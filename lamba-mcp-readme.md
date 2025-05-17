@@ -13,8 +13,25 @@ This project demonstrates a powerful architecture pattern for implementing MCP t
 │   (Desktop)    │       │  client        │      │  server         │
 │                │       │  (MCP Server)  │      │  (AWS Lambda)   │
 └────────────────┘       └────────────────┘      └─────────────────┘
-     MCP Protocol              HTTP/API
+     stdio                    HTTP/API
 ```
+
+### Connection Pattern
+
+It's important to understand the connection patterns between components:
+
+1. **Claude to MCP Client**: 
+   - Uses Standard Input/Output (stdio)
+   - Claude desktop app launches the MCP client as a child process
+   - Not HTTP-based but direct process communication
+   - Implemented using `StdioServerTransport` from the MCP SDK
+
+2. **MCP Client to Lambda**:
+   - Uses HTTP/API over the internet
+   - RESTful communication with JSON payloads
+   - Standard API Gateway to Lambda integration
+
+This architecture follows Claude's desktop app design which communicates with MCP servers using stdio for security, simplicity, and performance reasons rather than HTTP connections.
 
 ### Key Components:
 
@@ -51,6 +68,34 @@ This project demonstrates a powerful architecture pattern for implementing MCP t
 5. **Independent Deployment**:
    - Update Lambda without changing client configurations
    - Evolve your API while maintaining the same interface
+
+## AWS Lambda: Pros and Cons
+
+### Pros of Using AWS Lambda
+
+1. **Serverless Architecture**: No server management needed - deploy code without provisioning infrastructure
+2. **Auto-scaling**: Automatically scales with the number of requests, handling traffic spikes effortlessly
+3. **Pay-per-use**: Only pay for compute time consumed, with no charges when your code isn't running
+4. **High Availability**: Built-in fault tolerance and availability across multiple Availability Zones
+5. **Integration with AWS Services**: Seamless integration with other AWS services (S3, DynamoDB, etc.)
+6. **Security**: IAM roles provide fine-grained access control; environment variables for secure configuration
+7. **Event-driven Execution**: Trigger functions from various event sources (HTTP, S3, DynamoDB, etc.)
+8. **Concurrency Control**: Set concurrency limits to protect downstream resources
+9. **Stateless**: Encourages stateless, modular architecture, improving system design
+10. **Versions and Aliases**: Support for versioning and deployment management
+
+### Cons of Using AWS Lambda
+
+1. **Cold Start Latency**: Initial invocation can be slow, especially for rarely-used functions
+2. **Execution Limits**: Maximum execution time (15 minutes), memory constraints, and deployment package size limits
+3. **Complex Debugging**: Debugging and monitoring can be more challenging than traditional deployments
+4. **Limited Runtime Environment**: Restricted execution environment with limited filesystem access
+5. **Learning Curve**: New paradigm that requires learning different development and deployment patterns
+6. **Vendor Lock-in**: Architecture becomes tied to AWS, making migrations to other platforms harder
+7. **Cost Unpredictability**: While it can be cost-effective, unpredictable usage patterns can lead to higher costs
+8. **Limited Local Testing**: More difficult to test everything locally before deployment
+9. **State Management**: Managing state between invocations requires external services
+10. **Limited CPU Power**: Cannot leverage high-CPU instances for computation-intensive workloads
 
 ## Setting Up the Project
 
@@ -133,18 +178,26 @@ Update your claude_desktop_config.json with:
 
 ## Usage
 
-1. Start your MCP client:
-```bash
-cd ~/Projects/lamba-mcp-client
-node index.js
-```
+Using the MCP tool in Claude is straightforward:
 
-2. Restart Claude desktop app if needed
+1. **Configure Claude**: Ensure your claude_desktop_config.json correctly points to your MCP client script
 
-3. Use the tool in Claude:
+2. **No Manual Client Startup Needed**: Claude will automatically:
+   - Launch your MCP client as a child process when needed
+   - Communicate with it through stdio channels
+   - Terminate it when done
+
+3. **Use the tool in Claude by typing**:
 ```
 Can you help me learn about MCP using the learn_mcp tool?
 ```
+
+You can also specify topics:
+```
+I'd like to learn about MCP architecture, can you use the learn_mcp tool?
+```
+
+When Claude needs to use your tool, it will automatically launch and manage the MCP client process - you don't need to manually start or keep it running.
 
 ## Extending the Project
 

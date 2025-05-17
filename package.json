@@ -1,0 +1,13 @@
+{
+  "name": "lamba-mcp-client",
+  "version": "1.0.0",
+  "description": "MCP client for learning about Model Context Protocol",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.3"
+  }
+}

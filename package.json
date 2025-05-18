@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "node test.js",
+    "test:interactive": "node test.js interactive"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.3"
